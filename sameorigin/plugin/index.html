@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body style="background: #fefefe;">
+    <h1>Plugin</h1>
+    <div id="content">
+    </div>
+    <script>
+      // Same origin Plugin iFrame
+      //
+
+      // Local plugin namespace
+      var wizehive = wizehive || {};
+
+      // Plugin API method
+      window.wizehive.pluginGetData = funtion (params, callback) {
+        console.log('pluginGetData', params);
+        parent.appGetData(params, function(data, error) {
+          callback(data, error);
+        });
+      }
+
+      var gotData = null;
+      var gotError = null;
+
+      // Call Plugin API method now!
+      window.wizehive.pluginGetData({param1: 1, param2: 2}, function(data, error) {
+        gotData = data;
+        gotError = error;
+      });
+
+      console.log('Plugin iFrame API method got: data: ', gotData, ', error: ', gotError);
+
+      var content = document.getElementById('content');
+      content.innerHTML = 'data: '+gotData+', error: '+gotError;
+
+    </script>
+  </body>
+</html>
