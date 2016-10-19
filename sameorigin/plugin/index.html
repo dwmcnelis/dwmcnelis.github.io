@@ -15,9 +15,9 @@
       var wizehive = wizehive || {};
 
       // Plugin API method
-      window.wizehive.pluginGetData = funtion (params, callback) {
+      window.wizehive.pluginGetData = function (params, callback) {
         console.log('pluginGetData', params);
-        parent.appGetData(params, function(data, error) {
+        parent.appGetData(params, function (data, error) {
           callback(data, error);
         });
       }
@@ -26,7 +26,7 @@
       var gotError = null;
 
       // Call Plugin API method now!
-      window.wizehive.pluginGetData({param1: 1, param2: 2}, function(data, error) {
+      window.wizehive.pluginGetData({param1: 1, param2: 2}, function (data, error) {
         gotData = data;
         gotError = error;
       });

@@ -6,7 +6,7 @@
     <iframe width="100%" height="100%" src="/sameorigin/plugin/" style="border: none;"></iframe>
 
     <script>
-      window.wizehive.token = function() {
+      window.wizehive.token = function () {
         return 'acb8ef18cd9f2581d21ed6b3b2a3e1f5406c0e08';
       };
 
@@ -16,18 +16,18 @@
       // Local app namespace
       var wizehive = wizehive || {};
 
-      window.wizehive.token = function() {
+      window.wizehive.token = function () {
         return 'acb8ef18cd9f2581d21ed6b3b2a3e1f5406c0e08';
       };
 
       // Plugin API method
-      window.wizehive.appGetData = funtion (params, callback) {
+      window.wizehive.appGetData = function (params, callback) {
         window.wizehive.remoteGetData(params, function(data, error) {
           callback(data, error);
         })
       }
 
-      window.wizehive.remoteGetData = funtion (params, callback) {
+      window.wizehive.remoteGetData = function (params, callback) {
         // decorate params with token, add headers, etc.
         // http to backend api here
         // fake response for demo purposes
