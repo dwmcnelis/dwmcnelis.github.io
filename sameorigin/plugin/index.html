@@ -14,10 +14,15 @@
       // Plugin namespace
       window.wizehive = window.wizehive || {};
 
+      console.log('plugin window', window);
+      console.log('plugin document', document);
+      console.log('plugin parent', parent);
+      console.log(parent === window ? 'parent === window' : 'parent !== window')
+
       // Plugin API method
       window.wizehive.pluginGetData = function (params, callback) {
         console.log('pluginGetData', params);
-        window.parent.appGetData(params, function (data, error) {
+        parent.appGetData(params, function (data, error) {
           callback(data, error);
         });
       }
