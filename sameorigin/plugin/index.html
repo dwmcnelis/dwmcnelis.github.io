@@ -17,7 +17,7 @@
       // Plugin API method
       window.wizehive.pluginGetData = function (params, callback) {
         console.log('pluginGetData', params);
-        parent.appGetData(params, function (data, error) {
+        window.parent.appGetData(params, function (data, error) {
           callback(data, error);
         });
       }
