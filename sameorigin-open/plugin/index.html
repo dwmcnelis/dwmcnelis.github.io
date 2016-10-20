@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body style="background: #fefefe;">
+    <h1>Same Origin Plugin</h1>
+    <div id="content">
+    </div>
+    <script>
+      // Same Origin Open Plugin iFrame
+      //
+
+      // Plugin namespace
+      window.wizehive = window.wizehive || {};
+
+      // Plugin API method
+      window.wizehive.pluginGetData = function (params, callback) {
+        console.log('pluginGetData', params);
+        parent.wizehive.appGetData(params, function (data, error) {
+          callback(data, error);
+        });
+      }
+
+      var token = null;
+      var gotError = null;
+      var gotError = null;
+
+      // Call token method now!
+      token = parent.wizehive.token();
+
+      // Call Plugin API method now!
+      window.wizehive.pluginGetData({param1: 1, param2: 2}, function (data, error) {
+        gotData = data;
+        gotError = error;
+      });
+
+      console.log('Plugin iFrame API method got: data: ', gotData, ', error: ', gotError);
+
+      var content = document.getElementById('content');
+      content.innerHTML = '<div>data: '+JSON.stringify(gotData)+'</div><br><div>error: '+JSON.stringify(gotError)+'</div><br><div>token: '+token+'</div>';
+
+    </script>
+  </body>
+</html>

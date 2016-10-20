@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body style="background: #f3f3f3;">
+    <iframe width="100%" height="300px" src="/sandboxed-postmessage/plugin/" style="border: none;" sandbox="allow-scripts"></iframe>
+
+    <script>
+      // Sandboxed PostMessage App
+      //
+
+      // App namespace
+      window.wizehive = window.wizehive || {};
+
+      window.wizehive.token = function () {
+        return 'acb8ef18cd9f2581d21ed6b3b2a3e1f5406c0e08';
+      };
+
+      // Plugin API method
+      window.wizehive.appGetData = function (params, callback) {
+        console.log('appGetData: params: ', params);
+        window.wizehive.remoteGetData(params, function(data, error) {
+          callback(data, error);
+        });
+      }
+
+      window.wizehive.remoteGetData = function (params, callback) {
+         // decorate params with token, add headers, etc.
+        // http to backend api here
+        // fake response for demo purposes
+        callback([
+          {id: 10001, field1: 'A', field2: 1},
+          {id: 10002, field1: 'B', field2: 2},
+          {id: 10003, field1: 'C', field2: 2}
+        ], null);
+      }
+
+      window.addEventListener('message', function(event) {
+        console.log('app event origin', event.origin);
+        console.log('app event data', event.data);
+        console.log('app event source', event.source);
+
+        if (true || event.origin === 'https://dwmcnelis.github.io') {
+          var message = event.data;
+          var uuid = message.uuid;
+          var params = message.params;
+
+          // Dispatch decorated api function
+          window.wizehive.appGetData(params, function (data, error) {
+            event.source.postMessage({uuid: uuid, data: data, error: error}, '*');
+          });
+        }
+      });
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body style="background: #fefefe;">
+    <h1>Sandboxed PostMessage Plugin</h1>
+    <div id="content">
+    </div>
+    <script>
+      // Sandboxed PostMessage Plugin iFrame
+      //
+
+      // Plugin namespace
+      window.wizehive = window.wizehive || {};
+
+      // Demo uuid, later should use something like:
+      // var UUID = require('uuid-js');
+      window.wizehive.uuid = function () {
+        var uuids = Array(
+        '9a3a3ecf-89cc-42a2-9c33-3a5a9269ebf5',
+        'ce173771-903e-4110-bfd0-f14123e412ca',
+        'd575b57a-6bbd-4347-9d07-498c8b78a3bb');
+
+        return uuids[Math.floor(Math.random()*uuids.length)];
+      }
+
+      // Dispatch message queue
+      window.wizehive.messageQueue = [];
+
+      // Dispatch a message
+      window.wizehive.dispatchMessage = function(uuid, timeout, callback) {
+         window.wizehive.messageQueue.push({
+          uuid: uuid,
+          sent: Date.now(),
+          timeout: timeout,
+          callback: callback
+        });
+        console.log('dispatchMessage: uuid: ', uuid);
+      }
+
+      // Plugin API method
+      //
+      window.wizehive.pluginGetData = function (params, callback) {
+        var uuid = window.wizehive.uuid();
+        var message = {
+          uuid: uuid,
+          params: params
+        }
+
+        parent.postMessage(message, 'http://localhost:8080');
+        window.wizehive.dispatchMessage(uuid, 5000, function(data, error) {
+          callback(data, error);
+        });
+      }
+
+      // Poll for: expired messages, return error, and clean up
+      //
+      // For now run forever, but better use setTimeout if any
+      // messages currently dispatched (messageQueue not empty),
+      // and cancel when messageQueue drops back to empty.
+      //
+      window.wizehive.pollMessages = function () {
+        var now = Date.now();
+
+        for (var i = window.wizehive.messageQueue.length - 1; i >= 0; i--) {
+          var message = window.wizehive.messageQueue[i];
+
+          // Expired?
+          if ((now - message.sent) > message.timeout) {
+            console.log('pollMessages: Expired!: uuid: ', message.uuid);
+            message.callback(null, {status: -1, message: 'data could not be retreived'});
+            window.wizehive.messageQueue.splice(i, 1);
+          }
+        }
+      }
+
+      setInterval(window.wizehive.pollMessages, 250);
+
+      // Plugin message listener: match, return, and clean up
+      //
+      window.addEventListener('message', function(event) {
+        console.log('plugin event origin', event.origin);
+        console.log('plugin event data', event.data);
+        console.log('plugin event source', event.source);
+        if (event.origin === 'https://dwmcnelis.github.io') {
+          var response = event.data;
+          console.log('plugin event response: ', response)
+
+          for (var i = window.wizehive.messageQueue.length - 1; i >= 0; i--) {
+            var message = window.wizehive.messageQueue[i];
+
+            // Match to messageQueue
+            if (response.uuid === message.uuid) {
+              console.log('matched, call callback', response.data, response.error);
+              message.callback(response.data, response.error);
+              window.wizehive.messageQueue.splice(i, 1);
+            }
+          }
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function(event) {
+        console.log("DOM fully loaded and parsed");
+
+        // Call token method now!
+        // var token = parent.wizehive.token();
+        // console.log('token', token);
+
+        // Call Plugin API method now!
+        window.wizehive.pluginGetData({param1: 1, param2: 2}, function (data, error) {
+          console.log('Plugin iFrame API method got: data: ', data, ', error: ', error);
+          var content = document.getElementById('content');
+          content.innerHTML = '<div>data: '+JSON.stringify(data)+'</div><br><div>error: '+JSON.stringify(error)+'</div><br>';
+        });
+
+      });
+
+
+    </script>
+  </body>
+</html>
