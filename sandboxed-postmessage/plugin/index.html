@@ -48,7 +48,7 @@
           params: params
         }
 
-        parent.postMessage(message, 'http://localhost:8080');
+        parent.postMessage(message, 'https://dwmcnelis.github.io');
         window.wizehive.dispatchMessage(uuid, 5000, function(data, error) {
           callback(data, error);
         });
