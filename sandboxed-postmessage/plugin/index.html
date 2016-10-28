@@ -41,17 +41,89 @@
 
       // Plugin API method
       //
-      window.wizehive.pluginGetData = function (params, callback) {
+      window.wizehive.znData = function (name) {
+        
         var uuid = window.wizehive.uuid();
         var message = {
           uuid: uuid,
-          params: params
+          name: name // e.g. FormRecords
         }
 
-        parent.postMessage(message, 'https://dwmcnelis.github.io');
-        window.wizehive.dispatchMessage(uuid, 5000, function(data, error) {
-          callback(data, error);
-        });
+        var sendMessage = function(params, success, error, data) {
+
+          message.params = params;
+          message.data = data;
+
+          var promise; // load Q module?
+
+          parent.postMessage(message, 'https://dwmcnelis.github.io');
+
+          window.wizehive.dispatchMessage(uuid, 5000, function(response, isError) {
+
+            if (isError) {
+
+              if (typeof error === 'function') {
+                error(response);
+              }
+
+              // reject promise
+            } else {
+
+              if (typeof success === 'function') {
+                success(response);
+              }
+
+              // resolve promise
+            }
+
+          });
+
+          return promise;
+        };
+        
+        var get = function(params, success, error) {
+          return sendMessage(params, success, error);
+        };
+        
+        var save = function(params, data, success, error) {
+          
+          if (typeof data === 'function') {
+            error = success;
+            success = data;
+            data = params;
+            params = {};
+          } else if (typeof data === 'undefined') {
+            data = params;
+            params = {};
+          }
+          
+          return sendMessage(params, success, error, data);
+        };
+        
+        var request = function(action, isSave) {
+          
+          message.action = action;
+
+          if (isSave) {
+            return save; 
+          }
+
+			    return get;
+        };
+
+        return {
+          get: request('get'),
+          query: request('query'),
+          update: request('update', true), // to-do
+          updateAll: request('updateAll', true),
+          save: request('save', true),
+          saveAll: request('saveAll', true),
+          remove: request('remove'),
+          del: request('del'),
+          delete: request('delete'),
+          deleteAll: request('deleteAll')
+		    };
+
       }
 
       // Poll for: expired messages, return error, and clean up
@@ -108,10 +180,18 @@
         // console.log('token', token);
 
         // Call Plugin API method now!
-        window.wizehive.pluginGetData({param1: 1, param2: 2}, function (data, error) {
-          console.log('Plugin iFrame API method got: data: ', data, ', error: ', error);
+        window.wizehive.znData('FormRecords').get({param1: 1, param2: 2}, function (data) {
+          
+          console.log('Plugin iFrame API method got: data: ', data);
           var content = document.getElementById('content');
-          content.innerHTML = '<div>data: '+JSON.stringify(data)+'</div><br><div>error: '+JSON.stringify(error)+'</div><br>';
+          content.innerHTML = '<div>data: '+JSON.stringify(data)+'</div><br>';
+          
+        }, function(error) {
+
+              console.log('Plugin iFrame API method got: error: ', error);
+              var content = document.getElementById('content');
+              content.innerHTML = '<div>error: '+JSON.stringify(error)+'</div>';
+
         });
 
       });
